@@ -3,41 +3,39 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: secret-sync-operator
-  namespace: default
+  namespace: kube-system
 imagePullSecrets:
-- name: bluemix-default-secret
-- name: bluemix-default-secret-regional
-- name: bluemix-default-secret-international
-- name: default-icr-io
-- name: default-us-icr-io
-- name: default-uk-icr-io
-- name: default-de-icr-io
-- name: default-au-icr-io
-- name: default-jp-icr-io
+  - name: github-devopsfriend
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: secret-sync-operator
 rules:
-- apiGroups: [""]
-  resources: ["secrets", "configmaps"]
-  verbs: ["*"]
-- apiGroups: [""]
-  resources: ["namespaces", "pods", "replicasets"]
-  verbs: ["get"]
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["namespaces", "pods"]
+    verbs: ["get"]
+  - apiGroups: ["extensions", "apps"]
+    resources: ["replicasets", "deployments"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["create"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: secret-sync-operator
 subjects:
-- kind: ServiceAccount
-  name: secret-sync-operator
-  namespace: default
+  - kind: ServiceAccount
+    name: secret-sync-operator
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: secret-sync-operator
@@ -47,23 +45,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: secret-sync-operator
-  namespace: default
+  namespace: kube-system
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: secret-sync-operator
+      app: secret-sync-operator
   template:
     metadata:
       labels:
-        name: secret-sync-operator
+        app: secret-sync-operator
     spec:
       serviceAccountName: secret-sync-operator
       containers:
         - name: secret-sync-operator
-          image: <REPLACE WITH YOUR BUILT IMAGE NAME>
+          image: docker.pkg.github.com/unchartedsky/secret-sync-operator/ibm-secret-sync-operator:latest
           command:
-          - secret-sync-operator
+            - secret-sync-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE

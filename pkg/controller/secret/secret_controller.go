@@ -119,7 +119,6 @@ func (r *ReconcileSecret) Reconcile(request reconcile.Request) (reconcile.Result
 				namespaces := getNamespaces(namespaceType.Items)
 
 				reqLogger.Info(fmt.Sprintf("Secret [%s] in the [%s] namespace is configured for sync to [%s].", instance.Name, instance.Namespace, tgts))
-				reqLogger.Info(fmt.Sprintf("Secret [%s] in the [%s] namespace has the type [%s].", instance.Name, instance.Namespace, instance.Type))
 				targetList := strings.Split(tgts, ",")
 				for _, target := range targetList {
 					targetData := strings.Split(target, "/")
@@ -138,6 +137,12 @@ func (r *ReconcileSecret) Reconcile(request reconcile.Request) (reconcile.Result
 								return reconcile.Result{}, err
 							}
 						} else {
+							_, exists := secret.Labels["secretsync.ibm.com/replicated-from"]
+							if !exists {
+								msg := fmt.Sprintf("Target secret %s, which is not managed by secret-sync-operator, already exists and is not going to be updated", target)
+								reqLogger.Info(msg)
+								return reconcile.Result{}, fmt.Errorf(msg)
+							}
 							reqLogger.Info(fmt.Sprintf("Target secret %s exists, updating it now", target))
 							err = r.client.Update(context.TODO(), targetSecret)
 							if err != nil {

@@ -118,6 +118,7 @@ func (r *ReconcileSecret) Reconcile(request reconcile.Request) (reconcile.Result
 				namespaces := getNamespaces(namespaceType.Items)
 
 				reqLogger.Info(fmt.Sprintf("Secret [%s] in the [%s] namespace is configured for sync to [%s].", instance.Name, instance.Namespace, tgts))
+				reqLogger.Info(fmt.Sprintf("Secret [%s] in the [%s] namespace has the type [%s].", instance.Name, instance.Namespace, instance.Type))
 				targetList := strings.Split(tgts, ",")
 				for _, target := range targetList {
 					targetData := strings.Split(target, "/")

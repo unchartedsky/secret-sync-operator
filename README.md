@@ -1,3 +1,5 @@
+![](https://github.com/unchartedsky/secret-sync-operator/workflows/Dockerize/badge.svg)
+
 # secret-sync-operator
 A K8s Operator that helps keep secrets in sync across multiple namespaces
 

@@ -84,6 +84,29 @@ func createSecret(secret *corev1.Secret, name string, namespace string) (*corev1
 	}, nil
 }
 
+func remove(items []string, item string) []string {
+	var newItems []string
+	for _, i := range items {
+		if i != item {
+			newItems = append(newItems, i)
+		}
+	}
+	return newItems
+}
+
+func (r *ReconcileSecret) annotationToNamespaces(tgts string, namespaces []string, instanceNamespace string) []string {
+	if strings.HasPrefix(tgts, "ALL/") {
+		secret := strings.Split(tgts, "/")[1]
+		otherNamespaces := remove(namespaces, instanceNamespace)
+		var namespacedNames []string
+		for _, otherNamespace := range otherNamespaces {
+			namespacedNames = append(namespacedNames, otherNamespace + "/" + secret)
+		}
+		return namespacedNames
+	}
+	return strings.Split(tgts, ",")
+}
+
 // Reconcile reads that state of the cluster for a Secret object and makes changes based on the state read
 // and what is in the Secret.Spec
 // Note:
@@ -119,7 +142,9 @@ func (r *ReconcileSecret) Reconcile(request reconcile.Request) (reconcile.Result
 				namespaces := getNamespaces(namespaceType.Items)
 
 				reqLogger.Info(fmt.Sprintf("Secret [%s] in the [%s] namespace is configured for sync to [%s].", instance.Name, instance.Namespace, tgts))
-				targetList := strings.Split(tgts, ",")
+				reqLogger.Info(fmt.Sprintf("Secret [%s] in the [%s] namespace has the type [%s].", instance.Name, instance.Namespace, instance.Type))
+				targetList := r.annotationToNamespaces(tgts, namespaces, instance.Namespace)
+
 				for _, target := range targetList {
 					targetData := strings.Split(target, "/")
 					targetSecret,err := createSecret(instance, targetData[1], targetData[0])

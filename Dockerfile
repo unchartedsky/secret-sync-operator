@@ -8,8 +8,8 @@ RUN curl -OJL https://github.com/operator-framework/operator-sdk/releases/downlo
     && chmod +x operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu && cp operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu /usr/local/bin/operator-sdk && rm operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 WORKDIR /go/src/github.com/unchartedsky/secret-sync-operator
-RUN PATH=$GOPATH/bin:$PATH dep ensure
-RUN PATH=$GOPATH/bin:$PATH go build -o build/_output/bin/secret-sync-operator cmd/manager/main.go 
+RUN PATH=$GOPATH/bin:$PATH go mod download
+RUN PATH=$GOPATH/bin:$PATH go build -o build/_output/bin/secret-sync-operator cmd/manager/main.go
 
 
 
@@ -23,4 +23,3 @@ COPY --from=0 /go/src/github.com/unchartedsky/secret-sync-operator/build/bin /us
 RUN  /usr/local/bin/user_setup
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
 USER ${USER_UID}
-

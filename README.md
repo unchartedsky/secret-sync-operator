@@ -1,3 +1,5 @@
+You can find better maintainted alternatives from [Syncing Secrets Across Namespaces - cert-manager Documentation](https://cert-manager.io/docs/tutorials/syncing-secrets-across-namespaces/). I personally recommend [mittwald/kubernetes-replicator](https://github.com/mittwald/kubernetes-replicator).
+
 ![](https://github.com/unchartedsky/secret-sync-operator/workflows/Dockerize/badge.svg)
 
 # secret-sync-operator
